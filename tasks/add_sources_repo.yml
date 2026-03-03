@@ -1,17 +1,17 @@
 # mkdir
-- name: Make sure directory /etc/apt/keyrings exists
+- name: Make sure directory {{ spotify_apt_repo_key_dst | dirname }} exists
   become: true
   ansible.builtin.file:
-    path: /etc/apt/keyrings
+    path: "{{ spotify_apt_repo_key_dst | dirname }}"
     mode: u=rwx,g=rx,o=rx
     state: directory
 
 # copy key
-- name: Copy repo key to /etc/apt/keyrings/spotify.gpg
+- name: Copy repo key to {{ spotify_apt_repo_key_dst }}
   become: true
   ansible.builtin.copy:
     src: spotify.gpg
-    dest: /etc/apt/keyrings/spotify.gpg
+    dest: "{{ spotify_apt_repo_key_dst }}"
     owner: root
     group: root
     mode: u=rw,g=r,o=r
@@ -34,5 +34,12 @@
     suites: stable
     components: non-free
     enabled: yes
-    signed_by: /etc/apt/keyrings/spotify.gpg
-  register: __spotify_add_repo
+    signed_by: "{{ spotify_apt_repo_key_dst }}"
+  register: __spotify_add_repo # required in main.yml
+
+# only update cache if repo has been added
+- name: Update apt cache
+  when: __spotify_add_repo.changed
+  become: true
+  ansible.builtin.apt:
+    update_cache: true

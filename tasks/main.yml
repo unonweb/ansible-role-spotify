@@ -4,15 +4,18 @@
     - spotify
   block:
 
-  # add repo
-  - ansible.builtin.import_tasks: "{{ spotify_apt_repo_subtask }}"
+  # add list repo
+  - when: spotify_apt_repo_type == "list"
+    ansible.builtin.import_tasks: add_list_repo.yml
 
-  # only update cache if repo has been added
-  - name: Update apt cache
-    when: __spotify_add_repo.changed
-    become: true
-    ansible.builtin.apt:
-      update_cache: true
+  # add sources repo
+  - when: spotify_apt_repo_type == "sources"
+    ansible.builtin.import_tasks: add_sources_repo.yml
+
+  # debug
+  - ansible.builtin.debug:
+      msg: 
+      - "__spotify_add_repo: {{ __spotify_add_repo }}"
 
   # install spotify
   - name: Apt spotify-client -> {{ spotify_apt_state }}

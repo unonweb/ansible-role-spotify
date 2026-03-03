@@ -1,3 +1,4 @@
 ---
 spotify_apt_state: present
-spotify_apt_repo_subtask: add_sources_repo.yml
+spotify_apt_repo_type: list # sources
+spotify_apt_repo_key_dst: /etc/apt/keyrings/spotify.gpg
